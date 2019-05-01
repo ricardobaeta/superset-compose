@@ -1,4 +1,5 @@
 SUPERSET_REPO = https://github.com/apache/incubator-superset.git
+SUPERSET_VERSION = release--0.32
 SUPERSET_DIR = superset
 PATCH_SOURCE_DIR = srcd
 ADD_FILES = superset/superset_config.py superset/bblfsh superset/assets/src/uast
@@ -9,9 +10,9 @@ OVERRIDE_FILES = \
 
 all: superset patch
 
-# Clone superset repository (we will pin version later)
+# Clone superset repository
 superset:
-	git clone --quiet $(SUPERSET_REPO) $(SUPERSET_DIR)
+	git clone --quiet --branch $(SUPERSET_VERSION) $(SUPERSET_REPO) $(SUPERSET_DIR)
 
 # Overrides files in the superset repository
 .PHONY: patch
@@ -30,6 +31,11 @@ patch-dev:
 		rm -rf "$(SUPERSET_DIR)/$${file}"; \
 		ln -s "$(PATCH_SOURCE_DIR)/$${file}" "$(SUPERSET_DIR)/$${file}"; \
 	done; \
+
+# Updates patched files from superset repository
+.PHONY:
+fetch-update:
+	git --git-dir=$(SUPERSET_DIR)/.git checkout-index --prefix=$(PWD)/$(PATCH_SOURCE_DIR)/ -f $(OVERRIDE_FILES)
 
 # Create docker image
 .PHONY: build
